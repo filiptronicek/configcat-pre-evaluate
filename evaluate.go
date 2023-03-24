@@ -38,7 +38,7 @@ func newRolloutEvaluator(logger Logger) *rolloutEvaluator {
 		}}
 }
 
-func (evaluator *rolloutEvaluator) evaluate(json interface{}, key string, user *User) interface{} {
+func (evaluator *rolloutEvaluator) evaluateSingleRule(json interface{}, key string, user *User) interface{} {
 
 	node, ok := json.(map[string]interface{})
 	if !ok {
@@ -82,14 +82,15 @@ func (evaluator *rolloutEvaluator) evaluate(json interface{}, key string, user *
 				continue
 			}
 
+			ruleMatched := false
+
 			switch comparator {
 			//IS ONE OF
 			case 0:
 				separated := strings.Split(comparisonValue, ",")
 				for _, item := range separated {
 					if strings.Contains(strings.TrimSpace(item), userValue) {
-						evaluator.logMatch(comparisonAttribute, userValue, comparator, comparisonValue, value)
-						return value
+						ruleMatched = true
 					}
 				}
 			//IS NOT ONE OF
@@ -104,19 +105,19 @@ func (evaluator *rolloutEvaluator) evaluate(json interface{}, key string, user *
 
 				if !found {
 					evaluator.logMatch(comparisonAttribute, userValue, comparator, comparisonValue, value)
-					return value
+					ruleMatched = true
 				}
 			//CONTAINS
 			case 2:
 				if strings.Contains(userValue, comparisonValue) {
 					evaluator.logMatch(comparisonAttribute, userValue, comparator, comparisonValue, value)
-					return value
+					ruleMatched = true
 				}
 			//DOES NOT CONTAIN
 			case 3:
 				if !strings.Contains(userValue, comparisonValue) {
 					evaluator.logMatch(comparisonAttribute, userValue, comparator, comparisonValue, value)
-					return value
+					ruleMatched = true
 				}
 			//IS ONE OF, IS NOT ONE OF (SemVer)
 			case 4, 5:
@@ -150,7 +151,7 @@ func (evaluator *rolloutEvaluator) evaluate(json interface{}, key string, user *
 
 				if (matched && comparator == 4) || (!matched && comparator == 5) {
 					evaluator.logMatch(comparisonAttribute, userValue, comparator, comparisonValue, value)
-					return value
+					ruleMatched = true
 				}
 			//LESS THAN, LESS THAN OR EQUALS TO, GREATER THAN, GREATER THAN OR EQUALS TO (SemVer)
 			case 6, 7, 8, 9:
@@ -171,7 +172,7 @@ func (evaluator *rolloutEvaluator) evaluate(json interface{}, key string, user *
 					(comparator == 8 && userVersion.GT(cmpVersion)) ||
 					(comparator == 9 && userVersion.GTE(cmpVersion)) {
 					evaluator.logMatch(comparisonAttribute, userValue, comparator, comparisonValue, value)
-					return value
+					ruleMatched = true
 				}
 			//LESS THAN, LESS THAN OR EQUALS TO, GREATER THAN, GREATER THAN OR EQUALS TO (SemVer)
 			case 10, 11, 12, 13, 14, 15:
@@ -194,7 +195,7 @@ func (evaluator *rolloutEvaluator) evaluate(json interface{}, key string, user *
 					(comparator == 14 && userDouble > cmpDouble) ||
 					(comparator == 15 && userDouble >= cmpDouble) {
 					evaluator.logMatch(comparisonAttribute, userValue, comparator, comparisonValue, value)
-					return value
+					ruleMatched = true
 				}
 			//IS ONE OF (Sensitive)
 			case 16:
@@ -205,7 +206,7 @@ func (evaluator *rolloutEvaluator) evaluate(json interface{}, key string, user *
 				for _, item := range separated {
 					if strings.Contains(strings.TrimSpace(item), hash) {
 						evaluator.logMatch(comparisonAttribute, userValue, comparator, comparisonValue, value)
-						return value
+						ruleMatched = true
 					}
 				}
 			//IS NOT ONE OF (Sensitive)
@@ -223,11 +224,17 @@ func (evaluator *rolloutEvaluator) evaluate(json interface{}, key string, user *
 
 				if !found {
 					evaluator.logMatch(comparisonAttribute, userValue, comparator, comparisonValue, value)
-					return value
+					ruleMatched = true
 				}
 			}
 
-			evaluator.logNoMatch(comparisonAttribute, userValue, comparator, comparisonValue)
+			delete(node, "r")
+
+			if ruleMatched {
+				node["v"] = value
+			}
+
+			return node
 		}
 	}
 
@@ -262,6 +269,7 @@ func (evaluator *rolloutEvaluator) evaluate(json interface{}, key string, user *
 	evaluator.logger.Infof("Returning %v.", result)
 	return result
 }
+
 
 func (evaluator *rolloutEvaluator) logMatch(comparisonAttribute string, userValue interface{},
 	comparator float64, comparisonValue string, value interface{}) {
