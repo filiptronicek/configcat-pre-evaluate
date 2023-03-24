@@ -35,10 +35,12 @@ func TestEvaluate(t *testing.T) {
 	// Create a configcatpreevaluate.Evaluator
 	evaluator := newRolloutEvaluator(logger)
 
-	configSection := config.(map[string]interface{})["f"].(map[string]interface{})["isUsageBasedBillingEnabled"]
+	ruleToTest := "persistent_volume_claim"
+
+	configSection := config.(map[string]interface{})["f"].(map[string]interface{})[ruleToTest]
 
 	sampleUser := NewUserWithAdditionalAttributes("test", "test@example.com", "CZ", map[string]string{})
-	result := evaluator.evaluate(configSection , "isUsageBasedBillingEnabled", sampleUser)
+	result := evaluator.evaluate(configSection , ruleToTest, sampleUser)
 
 	// Print the result
 	fmt.Println(result)
