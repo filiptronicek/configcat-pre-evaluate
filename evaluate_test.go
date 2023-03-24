@@ -1,7 +1,6 @@
 package configcatpreevaluate
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -23,23 +22,12 @@ func TestEvaluateRule(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var config interface{}
-	err = json.Unmarshal(body, &config)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	logger := logrus.New()
 
 	evaluator := newRolloutEvaluator(logger)
 
 	sampleUser := NewUserWithAdditionalAttributes("test", "test@example.com", "CZ", map[string]string{})
-	result := evaluator.PreEvaluate(config, sampleUser)
+	result := evaluator.PreEvaluateJson(body, sampleUser)
 
-	resultJSON, err := json.Marshal(result)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	fmt.Println(string(resultJSON))
+	fmt.Println(string(result))
 }
