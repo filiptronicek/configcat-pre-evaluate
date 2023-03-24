@@ -6,12 +6,12 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/sirupsen/logrus"
 	"testing"
+
+	"github.com/sirupsen/logrus"
 )
 
-func TestEvaluate(t *testing.T) {
-	// Download the file and unmarshal it
+func TestEvaluateRule(t *testing.T) {
 	url := "https://gitpod.io/configcat/configuration-files/gitpod/config_v5.json"
 	resp, err := http.Get(url)
 	if err != nil {
@@ -29,19 +29,17 @@ func TestEvaluate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Create a logger
 	logger := logrus.New()
 
-	// Create a configcatpreevaluate.Evaluator
 	evaluator := newRolloutEvaluator(logger)
 
-	ruleToTest := "persistent_volume_claim"
-
-	configSection := config.(map[string]interface{})["f"].(map[string]interface{})[ruleToTest]
-
 	sampleUser := NewUserWithAdditionalAttributes("test", "test@example.com", "CZ", map[string]string{})
-	result := evaluator.evaluate(configSection , ruleToTest, sampleUser)
+	result := evaluator.evaluateEntireRuleSet(config, sampleUser)
 
-	// Print the result
-	fmt.Println(result)
+	resultJSON, err := json.Marshal(result)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Println(string(resultJSON))
 }

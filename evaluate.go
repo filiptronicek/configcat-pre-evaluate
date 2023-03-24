@@ -228,16 +228,18 @@ func (evaluator *rolloutEvaluator) evaluateSingleRule(json interface{}, key stri
 				}
 			}
 
-			delete(node, "r")
 
 			if ruleMatched {
 				node["v"] = value
+				node["r"] = []int{}
+				node["p"] = []int{}
+				return node
 			}
 
-			return node
 		}
 	}
 
+	/* todo(ft)
 	if percentageOk && len(percentageRules) > 0 {
 		hashCandidate := key + user.identifier
 		sha := sha1.New()
@@ -264,10 +266,46 @@ func (evaluator *rolloutEvaluator) evaluateSingleRule(json interface{}, key stri
 			}
 		}
 	}
+	*/
 
-	result := node["v"]
-	evaluator.logger.Infof("Returning %v.", result)
-	return result
+	node["r"] = []int{}
+	node["p"] = []int{}
+
+	evaluator.logger.Infof("Returning %v.", node["v"])
+	return node
+}
+
+type FeatureFlagConfig struct {
+	Properties map[string]interface{} `json:"p"`
+	Features map[string]interface{} `json:"f"`
+}
+
+func (evaluator *rolloutEvaluator) evaluateEntireRuleSet(json interface{}, user *User) FeatureFlagConfig {
+	if json == nil {
+		return FeatureFlagConfig{
+			Properties: make(map[string]interface{}),
+			Features: make(map[string]interface{}),
+		}
+	}
+
+	root, ok := json.(map[string]interface{})
+	evaluator.logger.Infof("Evaluating entire rule set: %v", root)
+
+	if !ok {
+		return FeatureFlagConfig{
+			Properties: make(map[string]interface{}),
+			Features: make(map[string]interface{}),
+		}
+	}
+
+	for key, value := range root["f"].(map[string]interface{}) {
+		root["f"].(map[string]interface{})[key] = evaluator.evaluateSingleRule(value, key, user)
+	}
+
+	return FeatureFlagConfig{
+		Properties: root["p"].(map[string]interface{}),
+		Features: root["f"].(map[string]interface{}),
+	}
 }
 
 
