@@ -62,8 +62,6 @@ func (evaluator *rolloutEvaluator) evaluateSingleRule(json interface{}, key stri
 		return result
 	}
 
-	evaluator.logger.Infof("User object: %v", user)
-
 	if rolloutOk {
 		for _, r := range rolloutRules {
 			rule, ok := r.(map[string]interface{})
@@ -228,7 +226,6 @@ func (evaluator *rolloutEvaluator) evaluateSingleRule(json interface{}, key stri
 				}
 			}
 
-
 			if ruleMatched {
 				node["v"] = value
 				node["r"] = []int{}
@@ -279,15 +276,19 @@ func (evaluator *rolloutEvaluator) evaluateSingleRule(json interface{}, key stri
 
 type FeatureFlagConfig struct {
 	Properties map[string]interface{} `json:"p"`
-	Features map[string]interface{} `json:"f"`
+	Features   map[string]interface{} `json:"f"`
 }
 
 func (evaluator *rolloutEvaluator) evaluateEntireRuleSet(json interface{}, user *User) FeatureFlagConfig {
 	if json == nil {
 		return FeatureFlagConfig{
 			Properties: make(map[string]interface{}),
-			Features: make(map[string]interface{}),
+			Features:   make(map[string]interface{}),
 		}
+	}
+
+	if user != nil {
+		evaluator.logger.Infof("User object: %v", user)
 	}
 
 	root, ok := json.(map[string]interface{})
@@ -296,7 +297,7 @@ func (evaluator *rolloutEvaluator) evaluateEntireRuleSet(json interface{}, user 
 	if !ok {
 		return FeatureFlagConfig{
 			Properties: make(map[string]interface{}),
-			Features: make(map[string]interface{}),
+			Features:   make(map[string]interface{}),
 		}
 	}
 
@@ -306,10 +307,9 @@ func (evaluator *rolloutEvaluator) evaluateEntireRuleSet(json interface{}, user 
 
 	return FeatureFlagConfig{
 		Properties: root["p"].(map[string]interface{}),
-		Features: root["f"].(map[string]interface{}),
+		Features:   root["f"].(map[string]interface{}),
 	}
 }
-
 
 func (evaluator *rolloutEvaluator) logMatch(comparisonAttribute string, userValue interface{},
 	comparator float64, comparisonValue string, value interface{}) {
