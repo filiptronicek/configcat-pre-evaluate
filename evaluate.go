@@ -38,6 +38,7 @@ func newRolloutEvaluator(logger Logger) *rolloutEvaluator {
 		}}
 }
 
+// Adapted from https://github.com/configcat/go-sdk/blob/218279137924bf88947c8cc8120aec6287b33104/rollout_evaluator.go
 func (evaluator *rolloutEvaluator) evaluateSingleRule(json interface{}, key string, user *User) interface{} {
 
 	node, ok := json.(map[string]interface{})

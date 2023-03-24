@@ -1,5 +1,7 @@
 package configcatpreevaluate
 
+// from: https://github.com/configcat/go-sdk/blob/218279137924bf88947c8cc8120aec6287b33104/user.go
+
 import "strings"
 
 // User is an object containing attributes to properly identify a given user for rollout evaluation.
