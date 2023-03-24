@@ -3,6 +3,7 @@ package configcatpreevaluate
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"encoding/json"
 	"strconv"
 	"strings"
 
@@ -311,6 +312,24 @@ func (evaluator *rolloutEvaluator) PreEvaluate(json interface{}, user *User) Fea
 		Features:   root["f"].(map[string]interface{}),
 	}
 }
+
+func (evaluator *rolloutEvaluator) PreEvaluateJson(file []byte, user *User) []byte {
+	var config interface{}
+	err := json.Unmarshal(file, &config)
+	if err != nil {
+		panic(err)
+	}
+	
+	result := evaluator.PreEvaluate(config, user)
+
+	resultJson, err := json.Marshal(result)
+	if err != nil {
+		panic(err)
+	}
+
+	return resultJson
+}
+	
 
 func (evaluator *rolloutEvaluator) logMatch(comparisonAttribute string, userValue interface{},
 	comparator float64, comparisonValue string, value interface{}) {
