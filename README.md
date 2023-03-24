@@ -16,7 +16,7 @@ func main() {
     }
 
     // Pre-evaluate the config
-    preEvaluatedConfig, err := configcat.PreEvaluate(config)
+    preEvaluatedConfig, err := configcat.PreEvaluateJson(config)
     if err != nil {
         panic(err)
     }
