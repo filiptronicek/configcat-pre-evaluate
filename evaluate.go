@@ -239,7 +239,6 @@ func (evaluator *rolloutEvaluator) evaluateSingleRule(json interface{}, key stri
 		}
 	}
 
-	/* todo(ft)
 	if percentageOk && len(percentageRules) > 0 {
 		hashCandidate := key + user.identifier
 		sha := sha1.New()
@@ -259,14 +258,17 @@ func (evaluator *rolloutEvaluator) evaluateSingleRule(json interface{}, key stri
 						if scaled < bucket {
 							result := rule["v"]
 							evaluator.logger.Infof("Evaluating %% options. Returning %s", result)
-							return result
+
+							node["v"] = result
+							node["r"] = []int{}
+							node["p"] = []int{}
+							return node
 						}
 					}
 				}
 			}
 		}
 	}
-	*/
 
 	node["r"] = []int{}
 	node["p"] = []int{}
