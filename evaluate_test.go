@@ -34,7 +34,7 @@ func TestEvaluateRule(t *testing.T) {
 	evaluator := newRolloutEvaluator(logger)
 
 	sampleUser := NewUserWithAdditionalAttributes("test", "test@example.com", "CZ", map[string]string{})
-	result := evaluator.evaluateEntireRuleSet(config, sampleUser)
+	result := evaluator.PreEvaluate(config, sampleUser)
 
 	resultJSON, err := json.Marshal(result)
 	if err != nil {

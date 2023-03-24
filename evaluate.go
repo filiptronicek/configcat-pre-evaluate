@@ -280,7 +280,7 @@ type FeatureFlagConfig struct {
 	Features   map[string]interface{} `json:"f"`
 }
 
-func (evaluator *rolloutEvaluator) evaluateEntireRuleSet(json interface{}, user *User) FeatureFlagConfig {
+func (evaluator *rolloutEvaluator) PreEvaluate(json interface{}, user *User) FeatureFlagConfig {
 	if json == nil {
 		return FeatureFlagConfig{
 			Properties: make(map[string]interface{}),
