@@ -15,7 +15,7 @@ type rolloutEvaluator struct {
 	comparatorTexts []string
 }
 
-func newRolloutEvaluator(logger Logger) *rolloutEvaluator {
+func NewRolloutEvaluator(logger Logger) *rolloutEvaluator {
 	return &rolloutEvaluator{logger: logger,
 		comparatorTexts: []string{
 			"IS ONE OF",
@@ -319,7 +319,7 @@ func (evaluator *rolloutEvaluator) PreEvaluateJson(file []byte, user *User) []by
 	if err != nil {
 		panic(err)
 	}
-	
+
 	result := evaluator.PreEvaluate(config, user)
 
 	resultJson, err := json.Marshal(result)
@@ -329,7 +329,6 @@ func (evaluator *rolloutEvaluator) PreEvaluateJson(file []byte, user *User) []by
 
 	return resultJson
 }
-	
 
 func (evaluator *rolloutEvaluator) logMatch(comparisonAttribute string, userValue interface{},
 	comparator float64, comparisonValue string, value interface{}) {

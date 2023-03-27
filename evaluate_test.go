@@ -24,7 +24,7 @@ func TestEvaluateRule(t *testing.T) {
 
 	logger := logrus.New()
 
-	evaluator := newRolloutEvaluator(logger)
+	evaluator := NewRolloutEvaluator(logger)
 
 	sampleUser := NewUserWithAdditionalAttributes("test", "test@example.com", "CZ", map[string]string{})
 	result := evaluator.PreEvaluateJson(body, sampleUser)
