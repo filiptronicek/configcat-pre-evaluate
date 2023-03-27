@@ -6,7 +6,11 @@ This Go package provides a simple way to pre-evaluate your feature flags when us
 
 ```go
 
-import "github.com/filiptronicek/configcat-pre-evaluate"
+import (
+    "io/ioutil"
+    "github.com/sirupsen/logrus"
+    "github.com/filiptronicek/configcat-pre-evaluate"
+)
 
 func main() {
     // Read the config_v5.json file
@@ -15,8 +19,11 @@ func main() {
         panic(err)
     }
 
+	logger := logrus.New()
+	evaluator := NewRolloutEvaluator(logger)
+
     // Pre-evaluate the config
-    preEvaluatedConfig, err := configcat.PreEvaluateJson(config)
+    preEvaluatedConfig, err := evaluator.PreEvaluateJson(config)
     if err != nil {
         panic(err)
     }
